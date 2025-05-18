@@ -2,7 +2,9 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
 import 'react-native-reanimated';
+import LoginScreen from './login';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -11,10 +13,16 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  // TODO: Replace with real authentication state from Cognito
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   if (!loaded) {
     // Async font loading only occurs in development.
     return null;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
   }
 
   return (

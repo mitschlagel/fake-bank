@@ -4,9 +4,8 @@ import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import 'react-native-reanimated';
-import LoginScreen from './login';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -34,29 +33,26 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // Log the current Amplify configuration
-    console.log('Current Amplify config:', Amplify.getConfig());
-  }, []);
 
   if (!loaded) {
     // Async font loading only occurs in development.
     return null;
   }
 
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={(isLoggedIn = true) => setIsAuthenticated(isLoggedIn)} />;
-  }
-
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen 
-          name="(tabs)" 
-          options={{ headerShown: false }} 
-          initialParams={{ onLogout: () => setIsAuthenticated(false) }}
+        <Stack.Screen
+          name="login"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
         />
         <Stack.Screen name="+not-found" />
       </Stack>

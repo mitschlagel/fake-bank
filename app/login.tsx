@@ -1,8 +1,12 @@
-import { confirmSignUp, signIn, signUp } from '@aws-amplify/auth';
+import { confirmSignUp, getCurrentUser, signIn, signOut, signUp } from '@aws-amplify/auth';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useTheme } from './theme';
 
-export default function LoginScreen({ navigation, onLogin }: any) {
+export default function LoginScreen() {
+  const router = useRouter();
+  const theme = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,6 +63,18 @@ export default function LoginScreen({ navigation, onLogin }: any) {
   const handleLogin = async () => {
     setLoading(true);
     try {
+      // First check if there's a user already signed in
+      try {
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+          console.log('Found existing user, signing out first');
+          await signOut();
+        }
+      } catch (error) {
+        // If getCurrentUser throws, it means no user is signed in, which is fine
+        console.log('No existing user found');
+      }
+
       console.log('Attempting login with:', { username });
       const { isSignedIn, nextStep } = await signIn({
         username,
@@ -70,9 +86,7 @@ export default function LoginScreen({ navigation, onLogin }: any) {
       console.log('Sign in response:', { isSignedIn, nextStep });
       
       if (isSignedIn) {
-        Alert.alert('Login Success', 'You are now logged in!');
-        if (onLogin) onLogin();
-        else navigation.replace('(tabs)');
+        router.replace('/(tabs)');
       } else {
         console.log('Login failed - not signed in');
         Alert.alert('Login Failed', 'Authentication failed.');
@@ -87,51 +101,107 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 
   if (needsConfirmation) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Confirm Sign Up</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Confirmation Code"
-          value={confirmationCode}
-          onChangeText={setConfirmationCode}
-          keyboardType="number-pad"
-        />
-        <Button 
-          title={loading ? 'Confirming...' : 'Confirm'} 
-          onPress={handleConfirmSignUp} 
-          disabled={loading} 
-        />
+      <View style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}>
+        <Image source={require('../logo.png')} style={styles.logo} />
+        <View style={[styles.card, { backgroundColor: theme.colors.background.primary }]}>
+          <Text style={[styles.title, { color: theme.colors.primary }]}>Verify Your Email</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>Enter the code sent to your email</Text>
+          <TextInput
+            style={[styles.input, { 
+              backgroundColor: theme.colors.background.secondary,
+              color: theme.colors.text.primary,
+              borderColor: theme.colors.border
+            }]}
+            placeholder="Confirmation Code"
+            value={confirmationCode}
+            onChangeText={setConfirmationCode}
+            keyboardType="number-pad"
+            placeholderTextColor={theme.colors.text.secondary}
+          />
+          <TouchableOpacity 
+            style={[
+              styles.button, 
+              { backgroundColor: theme.colors.primary },
+              loading && { backgroundColor: theme.colors.primaryDark, opacity: 0.7 }
+            ]} 
+            onPress={handleConfirmSignUp} 
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={theme.colors.text.light} />
+            ) : (
+              <Text style={[styles.buttonText, { color: theme.colors.text.light }]}>Confirm</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{isSignUp ? 'Sign Up' : 'Login'}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <Button 
-        title={loading ? 'Please wait...' : (isSignUp ? 'Sign Up' : 'Login')} 
-        onPress={isSignUp ? handleSignUp : handleLogin} 
-        disabled={loading} 
-      />
-      <Button 
-        title={isSignUp ? 'Already have an account? Login' : 'Need an account? Sign Up'} 
-        onPress={() => setIsSignUp(!isSignUp)} 
-      />
+    <View style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}>
+      <Image source={require('../logoDark.png')} style={styles.logo} />
+      <View style={[styles.card, { backgroundColor: theme.colors.background.primary }]}>
+        <Text style={[styles.title, { color: theme.colors.primary }]}>
+          {isSignUp ? 'Create Account' : 'Welcome Back'}
+        </Text>
+        <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
+          {isSignUp ? 'Sign up to get started' : 'Sign in to your account'}
+        </Text>
+        
+        <TextInput
+          style={[styles.input, { 
+            backgroundColor: theme.colors.background.secondary,
+            color: theme.colors.text.primary,
+            borderColor: theme.colors.border
+          }]}
+          placeholder="Email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={username}
+          onChangeText={setUsername}
+          placeholderTextColor={theme.colors.text.secondary}
+        />
+        <TextInput
+          style={[styles.input, { 
+            backgroundColor: theme.colors.background.secondary,
+            color: theme.colors.text.primary,
+            borderColor: theme.colors.border
+          }]}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          placeholderTextColor={theme.colors.text.secondary}
+        />
+        
+        <TouchableOpacity 
+          style={[
+            styles.button, 
+            { backgroundColor: theme.colors.primary },
+            loading && { backgroundColor: theme.colors.primaryDark, opacity: 0.7 }
+          ]} 
+          onPress={isSignUp ? handleSignUp : handleLogin} 
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.colors.text.light} />
+          ) : (
+            <Text style={[styles.buttonText, { color: theme.colors.text.light }]}>
+              {isSignUp ? 'Create Account' : 'Sign In'}
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.switchButton} 
+          onPress={() => setIsSignUp(!isSignUp)}
+        >
+          <Text style={[styles.switchButtonText, { color: theme.colors.primary }]}>
+            {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -139,24 +209,60 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 360,
+    height: 360,
+    alignSelf: 'center',
+    marginBottom: 24,
+    resizeMode: 'contain',
+  },
+  card: {
+    borderRadius: 16,
+    padding: 32,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 24,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontWeight: '400',
+    marginBottom: 32,
   },
   input: {
-    width: '100%',
-    height: 48,
-    borderColor: '#ccc',
-    borderWidth: 1,
     borderRadius: 8,
+    padding: 16,
     marginBottom: 16,
-    paddingHorizontal: 12,
-    fontSize: 18,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  button: {
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  switchButton: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  switchButtonText: {
+    fontSize: 14,
   },
 }); 

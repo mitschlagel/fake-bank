@@ -1,5 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Amplify } from 'aws-amplify';
+import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -13,8 +14,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 const amplifyConfig = {
   Auth: {
     Cognito: {
-      userPoolId: 'us-east-1_ESnMhdDx4', // Replace with your User Pool ID
-      userPoolClientId: '4oticvosrbiu40gl0iqcd9fst2', // Replace with your Client ID
+      userPoolId: Constants.expoConfig?.extra?.awsUserPoolId,
+      userPoolClientId: Constants.expoConfig?.extra?.awsUserPoolClientId,
       signUpVerificationMethod: 'code' as const,
       loginWith: {
         email: true,

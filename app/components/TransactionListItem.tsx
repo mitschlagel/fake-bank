@@ -9,40 +9,6 @@ interface TransactionListItemProps {
   account: Account;
 }
 
-const BUSINESS_LOGOS: { [key: string]: string } = {
-  'Starbucks': 'cafe',
-  'Chipotle': 'restaurant',
-  'Whole Foods': 'nutrition',
-  'Trader Joe\'s': 'basket',
-  'Amazon': 'cart',
-  'Best Buy': 'desktop',
-  'Nike': 'walk',
-  'Apple Store': 'phone-portrait',
-  'Netflix': 'film',
-  'Spotify': 'musical-notes',
-  'Uber': 'car',
-  'Lyft': 'car',
-  'Shell': 'water',
-  'Exxon': 'water',
-  'AT&T': 'call',
-  'Verizon': 'call',
-  'Comcast': 'tv',
-  'CVS Pharmacy': 'medical',
-  'Walgreens': 'medical',
-  'Airbnb': 'home',
-  'Expedia': 'airplane',
-  'Delta Airlines': 'airplane',
-  'Marriott': 'bed',
-  'Hilton': 'bed',
-  'Udemy': 'school',
-  'Coursera': 'school',
-  'Barnes & Noble': 'book',
-  'PayPal': 'wallet',
-  'Venmo': 'wallet',
-  'Square': 'card',
-  'Stripe': 'card',
-};
-
 export function TransactionListItem({ transaction, account }: TransactionListItemProps) {
   const theme = useTheme();
 
@@ -62,10 +28,6 @@ export function TransactionListItem({ transaction, account }: TransactionListIte
   };
 
   const getTransactionIcon = () => {
-    if (transaction.type === 'withdrawal' && transaction.description in BUSINESS_LOGOS) {
-      return BUSINESS_LOGOS[transaction.description] as keyof typeof Ionicons.glyphMap;
-    }
-    
     switch (transaction.type) {
       case 'deposit':
         return 'arrow-down-circle' as keyof typeof Ionicons.glyphMap;
@@ -84,7 +46,7 @@ export function TransactionListItem({ transaction, account }: TransactionListIte
         <Ionicons
           name={getTransactionIcon()}
           size={24}
-          color={transaction.amount >= 0 ? theme.colors.success : theme.colors.error}
+          color={theme.colors.text.secondary}
         />
       </View>
       <View style={styles.detailsContainer}>
@@ -92,7 +54,7 @@ export function TransactionListItem({ transaction, account }: TransactionListIte
           <Text style={[styles.description, { color: theme.colors.text.primary }]}>
             {transaction.description}
           </Text>
-          <Text style={[styles.amount, { color: transaction.amount >= 0 ? theme.colors.success : theme.colors.error }]}>
+          <Text style={[styles.amount, { color: transaction.amount >= 0 ? theme.colors.success : theme.colors.mutedError }]}>
             {formatAmount(transaction.amount)}
           </Text>
         </View>

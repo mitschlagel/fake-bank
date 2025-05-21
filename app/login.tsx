@@ -201,6 +201,16 @@ export default function LoginScreen() {
             {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
           </Text>
         </TouchableOpacity>
+
+        {/* Development Bypass Button */}
+        <TouchableOpacity 
+          style={[styles.devButton, { borderColor: theme.colors.primary }]} 
+          onPress={() => router.replace('/')}
+        >
+          <Text style={[styles.devButtonText, { color: theme.colors.primary }]}>
+            Development: Skip Login
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -213,8 +223,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 360,
-    height: 360,
+    width: 280,
+    height: 280,
     alignSelf: 'center',
     marginBottom: 24,
     resizeMode: 'contain',
@@ -264,5 +274,16 @@ const styles = StyleSheet.create({
   },
   switchButtonText: {
     fontSize: 14,
+  },
+  devButton: {
+    marginTop: 24,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  devButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 }); 

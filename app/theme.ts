@@ -23,6 +23,7 @@ export const lightTheme = {
     border: '#dcdde1',
     error: '#e74c3c',
     success: '#27ae60',
+    mutedError: '#c0392b',
   },
   spacing: {
     xs: 4,
@@ -79,9 +80,9 @@ export const lightTheme = {
 
 export const darkTheme = {
   colors: {
-    primary: '#2e8b57',
-    primaryDark: '#226944',
-    primaryLight: '#3cb371',
+    primary: '#3cb371',
+    primaryDark: '#2e8b57',
+    primaryLight: '#4cdd8c',
     secondary: '#34495e',
     secondaryDark: '#2c3e50',
     secondaryLight: '#4a6278',
@@ -100,6 +101,7 @@ export const darkTheme = {
     border: '#404040',
     error: '#e74c3c',
     success: '#27ae60',
+    mutedError: '#c0392b',
   },
   spacing: lightTheme.spacing,
   typography: lightTheme.typography,

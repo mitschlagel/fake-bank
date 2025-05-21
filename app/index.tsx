@@ -42,15 +42,22 @@ export default function HomeScreen() {
           
           {/* Quick Actions */}
           <View style={styles.quickActions}>
-            <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}>
-              <Text style={[styles.actionButtonText, { color: theme.colors.primary }]}>Transfer</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}>
-              <Text style={[styles.actionButtonText, { color: theme.colors.primary }]}>Pay Bills</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}>
-              <Text style={[styles.actionButtonText, { color: theme.colors.primary }]}>Deposit</Text>
-            </TouchableOpacity>
+            <View style={styles.quickActionsRow}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}>
+                <Text style={[styles.actionButtonText, { color: theme.colors.primary }]} numberOfLines={1}>Transfer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}>
+                <Text style={[styles.actionButtonText, { color: theme.colors.primary }]} numberOfLines={1}>Pay Bills</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.quickActionsRow}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}>
+                <Text style={[styles.actionButtonText, { color: theme.colors.primary }]} numberOfLines={1}>Deposit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}>
+                <Text style={[styles.actionButtonText, { color: theme.colors.primary }]} numberOfLines={1}>Send Money with Zelle™</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Recent Transactions */}
@@ -93,17 +100,20 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   quickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 12,
-    paddingHorizontal: 4,
+    gap: 8,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
   },
   actionButton: {
     flex: 1,
-    marginHorizontal: 4,
-    padding: 10,
+    height: 44,
+    paddingHorizontal: 8,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -114,8 +124,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+    textAlign: 'center',
   },
   accountsSection: {
     marginBottom: 24,

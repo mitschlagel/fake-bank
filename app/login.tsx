@@ -86,7 +86,7 @@ export default function LoginScreen() {
       console.log('Sign in response:', { isSignedIn, nextStep });
       
       if (isSignedIn) {
-        router.replace('/(tabs)');
+        router.replace('/');
       } else {
         console.log('Login failed - not signed in');
         Alert.alert('Login Failed', 'Authentication failed.');

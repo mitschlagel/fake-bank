@@ -49,9 +49,25 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="(tabs)"
+          name="index"
           options={{
             headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="transactions"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+          }}
+        />
+        <Stack.Screen
+          name="account-details"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
           }}
         />
         <Stack.Screen name="+not-found" />

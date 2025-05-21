@@ -1,18 +1,16 @@
 import { signOut } from '@aws-amplify/auth';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AccountListItem } from './components/AccountListItem';
 import { Header } from './components/Header';
 import { TransactionListItem } from './components/TransactionListItem';
 import { useTheme } from './theme';
-import { Account, getRecentTransactions, mockAccounts } from './types/account';
+import { getRecentTransactions, mockAccounts } from './types/account';
 
 export default function HomeScreen() {
   const router = useRouter();
   const theme = useTheme();
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-  const [isDetailsVisible, setIsDetailsVisible] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -21,11 +19,6 @@ export default function HomeScreen() {
     } catch (error) {
       console.error('Logout error:', error);
     }
-  };
-
-  const handleCloseDetails = () => {
-    setIsDetailsVisible(false);
-    setSelectedAccount(null);
   };
 
   return (

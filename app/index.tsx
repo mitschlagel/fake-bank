@@ -2,7 +2,6 @@ import { signOut } from '@aws-amplify/auth';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { AccountDetailsSheet } from './components/AccountDetailsSheet';
 import { AccountListItem } from './components/AccountListItem';
 import { Header } from './components/Header';
 import { TransactionListItem } from './components/TransactionListItem';
@@ -24,18 +23,9 @@ export default function HomeScreen() {
     }
   };
 
-  const handleAccountPress = (account: Account) => {
-    setSelectedAccount(account);
-    setIsDetailsVisible(true);
-  };
-
   const handleCloseDetails = () => {
     setIsDetailsVisible(false);
     setSelectedAccount(null);
-  };
-
-  const getAccountById = (accountId: string) => {
-    return mockAccounts.find(account => account.id === accountId) || mockAccounts[0];
   };
 
   return (
@@ -72,7 +62,14 @@ export default function HomeScreen() {
 
           {/* Recent Transactions */}
           <View style={[styles.activitySection, { backgroundColor: theme.colors.background.primary }]}>
-            <Text style={[styles.subSectionTitle, { color: theme.colors.text.primary }]}>Recent</Text>
+            <View style={styles.recentHeader}>
+              <Text style={[styles.subSectionTitle, { color: theme.colors.text.primary }]}>Recent</Text>
+              <TouchableOpacity 
+                onPress={() => router.push('/transactions')}
+              >
+                <Text style={[styles.viewAllText, { color: theme.colors.primary }]}>View All</Text>
+              </TouchableOpacity>
+            </View>
             {getRecentTransactions().map((transaction) => (
               <TouchableOpacity
                 key={transaction.id}
@@ -90,12 +87,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-
-      <AccountDetailsSheet
-        account={selectedAccount}
-        visible={isDetailsVisible}
-        onClose={handleCloseDetails}
-      />
     </View>
   );
 }
@@ -111,13 +102,13 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 12,
     paddingHorizontal: 4,
   },
   actionButton: {
     flex: 1,
     marginHorizontal: 4,
-    padding: 12,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
     shadowColor: '#000',
@@ -142,20 +133,30 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   activitySection: {
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 12,
+    padding: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   subSectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  recentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 }); 

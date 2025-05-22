@@ -200,6 +200,13 @@ export default function AccountDetailsScreen() {
                 onPress={() => {
                   setShowMoneyActions(false);
                   // Handle action
+                  if (action.id === 'transfer') {
+                    router.push('/transfer');
+                  } else if (action.id === 'deposit') {
+                    router.push('/deposit');
+                  } else if (action.id === 'pay-bills' || action.id === 'pay-bill') {
+                    router.push('/pay-bills');
+                  }
                 }}
               >
                 <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={theme.colors.primary} />

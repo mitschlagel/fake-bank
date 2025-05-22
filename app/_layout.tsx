@@ -44,42 +44,57 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen
-            name="login"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="index"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="transactions"
-            options={{
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen 
+            name="account-details" 
+            options={{ 
               headerShown: false,
               presentation: 'modal',
-              animation: 'slide_from_bottom',
-            }}
+              animation: 'slide_from_bottom'
+            }} 
           />
-          <Stack.Screen
-            name="account-details"
-            options={{
+          <Stack.Screen 
+            name="transactions" 
+            options={{ 
               headerShown: false,
               presentation: 'modal',
-              animation: 'slide_from_bottom',
-            }}
+              animation: 'slide_from_bottom'
+            }} 
           />
-          <Stack.Screen
-            name="manage-accounts"
-            options={{
+          <Stack.Screen 
+            name="transfer" 
+            options={{ 
               headerShown: false,
               presentation: 'modal',
-              animation: 'slide_from_bottom',
-            }}
+              animation: 'slide_from_bottom'
+            }} 
           />
+          <Stack.Screen 
+            name="pay-bills" 
+            options={{ 
+              headerShown: false,
+              presentation: 'modal',
+              animation: 'slide_from_bottom'
+            }} 
+          />
+          <Stack.Screen 
+            name="deposit" 
+            options={{ 
+              headerShown: false,
+              presentation: 'modal',
+              animation: 'slide_from_bottom'
+            }} 
+          />
+          <Stack.Screen 
+            name="zelle" 
+            options={{ 
+              headerShown: false,
+              presentation: 'modal',
+              animation: 'slide_from_bottom'
+            }} 
+          />
+          <Stack.Screen name="manage-accounts" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

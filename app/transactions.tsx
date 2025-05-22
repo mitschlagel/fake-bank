@@ -19,7 +19,6 @@ import { useTheme } from './theme';
 import { mockAccounts, mockTransactions } from './types/account';
 
 type DateFilter = 'all' | 'today' | 'week' | 'month' | 'year';
-type SortOrder = 'newest' | 'oldest';
 
 const getDateRange = (filter: DateFilter) => {
   const now = new Date();
@@ -53,7 +52,6 @@ export default function TransactionsScreen() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<typeof mockTransactions[0] | null>(null);
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [showDateRangeModal, setShowDateRangeModal] = useState(false);
 
   // Set the selected transaction when the screen loads with a selectedTransactionId
@@ -110,11 +108,11 @@ export default function TransactionsScreen() {
     filtered.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      return dateB - dateA; // Always sort newest first
     });
 
     return filtered;
-  }, [selectedAccountId, dateFilter, searchQuery, sortOrder]);
+  }, [selectedAccountId, dateFilter, searchQuery]);
 
   const renderTransaction = ({ item: transaction }: { item: typeof mockTransactions[0] }) => {
     const isSelected = transaction.id === selectedTransactionId;
@@ -256,15 +254,12 @@ export default function TransactionsScreen() {
         <View style={styles.titleContainer}>
           <Text style={[styles.title, { color: theme.colors.text.primary }]}>Transactions</Text>
         </View>
-        <Pressable
+        <TouchableOpacity 
+          style={styles.calendarButton}
           onPress={() => setShowDateRangeModal(true)}
-          style={({ pressed }) => [
-            styles.headerButton,
-            { opacity: pressed ? 0.7 : 1 }
-          ]}
         >
-          <Ionicons name="calendar" size={20} color={theme.colors.primary} />
-        </Pressable>
+          <Ionicons name="calendar-outline" size={24} color={theme.colors.primary} />
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.searchContainer, { backgroundColor: theme.colors.background.primary }]}>
@@ -374,7 +369,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   dateFilterContainer: {
-    display: 'none',
+    // display: 'none',
   },
   modalOverlay: {
     flex: 1,
@@ -415,7 +410,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  headerButton: {
+  calendarButton: {
     padding: 8,
     position: 'absolute',
     right: 8,

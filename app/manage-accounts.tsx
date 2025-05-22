@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+    SafeAreaView,
     StyleSheet,
     Switch,
     Text,
@@ -69,7 +70,7 @@ export default function ManageAccountsScreen() {
     }
   };
 
-  const toggleAccountVisibility = async (accountId: string) => {
+  const toggleAccountVisibility = useCallback(async (accountId: string) => {
     const newVisibleAccounts = new Set(visibleAccounts);
     if (newVisibleAccounts.has(accountId)) {
       newVisibleAccounts.delete(accountId);
@@ -83,7 +84,7 @@ export default function ManageAccountsScreen() {
     } catch (error) {
       console.error('Error saving visible accounts:', error);
     }
-  };
+  }, [visibleAccounts]);
 
   const handleDragEnd = async ({ data }: { data: Account[] }) => {
     setAccounts(data);
@@ -104,7 +105,7 @@ export default function ManageAccountsScreen() {
           <View style={styles.accountItemContent}>
             <View style={styles.accountInfo}>
                <Ionicons 
-                    name={item.type === 'checking' ? 'card' : item.type === 'savings' ? 'wallet' : 'cash'} 
+                    name={item.type === 'checking' ? 'wallet-outline' : item.type === 'savings' ? 'cash-outline' : 'card-outline'} 
                     size={24} 
                     color={theme.colors.primary} 
                   />
@@ -135,7 +136,7 @@ export default function ManageAccountsScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}>
         <View style={[styles.header, { backgroundColor: theme.colors.background.primary }]}>
           <TouchableOpacity 
             style={styles.closeButton} 
@@ -159,7 +160,7 @@ export default function ManageAccountsScreen() {
             />
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }

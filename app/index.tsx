@@ -1,17 +1,25 @@
 import { signOut } from '@aws-amplify/auth';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { AccountListItem } from './components/AccountListItem';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Header } from './components/Header';
-import { TransactionListItem } from './components/TransactionListItem';
+import AccountSection from './components/sections/AccountSection';
+import ActivitySection from './components/sections/ActivitySection';
+import RecentTransactionsSection from './components/sections/RecentTransactionsSection';
 import { useTheme } from './theme';
 import { getRecentTransactions, mockAccounts } from './types/account';
 
 const VISIBLE_ACCOUNTS_KEY = '@visible_accounts';
 const ACCOUNT_ORDER_KEY = '@account_order';
+
+interface Action {
+  id: string;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress: () => void;
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -75,79 +83,47 @@ export default function HomeScreen() {
       return indexA - indexB; // Both in order, sort by order index
     });
 
+  const quickActions: Action[] = [
+    {
+      id: 'transfer',
+      label: 'Transfer',
+      icon: 'swap-horizontal-outline',
+      onPress: () => router.push('/transfer'),
+    },
+    {
+      id: 'pay-bills',
+      label: 'Pay Bills',
+      icon: 'receipt-outline',
+      onPress: () => router.push('/pay-bills'),
+    },
+    {
+      id: 'deposit',
+      label: 'Deposit',
+      icon: 'add-circle-outline',
+      onPress: () => router.push('/deposit'),
+    },
+    {
+      id: 'zelle',
+      label: 'Send Money with Zelle™',
+      icon: 'paper-plane-outline',
+      onPress: () => router.push('/zelle'),
+    },
+  ];
+
+  const getAccountById = (accountId: string) => {
+    return mockAccounts.find(account => account.id === accountId) || mockAccounts[0];
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}>
       <Header onLogout={handleLogout} />
       <ScrollView style={styles.content}>
-        {/* Accounts Section */}
-        <View style={styles.accountsSection}>
-          <View style={styles.accountsHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>Accounts</Text>
-            <TouchableOpacity 
-              onPress={() => router.push('/manage-accounts')}
-              style={styles.manageButton}
-            >
-              <Text style={[styles.manageButtonText, { color: theme.colors.primary }]}>Manage</Text>
-            </TouchableOpacity>
-          </View>
-          {displayedAccounts.map((account) => (
-            <AccountListItem
-              key={account.id}
-              account={account}
-            />
-          ))}
-        </View>
-
-        {/* Activity Section */}
-        <View style={styles.activitySectionContainer}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>Activities</Text>
-          
-          {/* Quick Actions */}
-          <View style={styles.quickActions}>
-            {[
-              { id: 'transfer', label: 'Transfer', icon: 'swap-horizontal' },
-              { id: 'pay-bills', label: 'Pay Bills', icon: 'card' },
-              { id: 'deposit', label: 'Deposit', icon: 'arrow-down-circle' },
-              { id: 'zelle', label: 'Send Money with Zelle™', icon: 'paper-plane' }
-            ].map((action) => (
-              <TouchableOpacity
-                key={action.id}
-                style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}
-              >
-                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={16} color={theme.colors.primary} />
-                <Text style={[styles.actionButtonText, { color: theme.colors.primary }]} numberOfLines={1}>
-                  {action.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Recent Transactions */}
-          <View style={styles.recentHeader}>
-            <Text style={[styles.subSectionTitle, { color: theme.colors.text.primary }]}>Recent Transactions</Text>
-            <TouchableOpacity 
-              onPress={() => router.push('/transactions')}
-            >
-              <Text style={[styles.viewAllText, { color: theme.colors.primary }]}>View All</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={[styles.activitySection, { backgroundColor: theme.colors.background.primary }]}>
-            {recentTransactions.map((transaction) => (
-              <TouchableOpacity
-                key={transaction.id}
-                onPress={() => router.push({
-                  pathname: '/transactions',
-                  params: { selectedTransactionId: transaction.id }
-                })}
-              >
-                <TransactionListItem
-                  transaction={transaction}
-                  account={mockAccounts.find(acc => acc.id === transaction.accountId) || mockAccounts[0]}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        <AccountSection accounts={displayedAccounts} />
+        <ActivitySection quickActions={quickActions} />
+        <RecentTransactionsSection 
+          transactions={recentTransactions}
+          getAccountById={getAccountById}
+        />
       </ScrollView>
     </View>
   );
@@ -161,88 +137,5 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  quickActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 40,
-  },
-  actionButton: {
-    flex: 1,
-    minWidth: '48%',
-    height: 44,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  actionButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  accountsSection: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  activitySection: {
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    marginTop: 8,
-  },
-  activitySectionContainer: {
-    marginBottom: 24,
-  },
-  recentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  subSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 0,
-  },
-  viewAllText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  accountsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  manageButton: {
-    // Keep this style for potential future adjustments, but remove padding here too
-    marginTop: -12, // Adjust vertical alignment
-  },
-  manageButtonText: {
-    fontSize: 14, // Match nearby text size
-    fontWeight: '600', // Match nearby text weight
-    // Add any other specific text styles if needed
-  },
+  // Remove all the section styles that were moved to individual components
 }); 

@@ -9,18 +9,15 @@ export default {
     icon: './assets/images/icon.png',
     scheme: 'myapp',
     userInterfaceStyle: 'automatic',
-    splash: {
-      image: './assets/images/splash.png',
-      resizeMode: 'contain',
-      backgroundColor: '#ffffff'
-    },
     assetBundlePatterns: [
       '**/*'
     ],
     ios: {
+      bundleIdentifier: "com.mitschlagel.fakebank",
       supportsTablet: true
     },
     android: {
+      package: "com.mitschlagel.fakebank",
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#ffffff'
@@ -40,6 +37,9 @@ export default {
     extra: {
       awsUserPoolId: process.env.AWS_USER_POOL_ID,
       awsUserPoolClientId: process.env.AWS_USER_POOL_CLIENT_ID,
+      eas: {
+        projectId: "008688bd-3084-4e5e-b40c-e7d6a12937a0"
+      }
     }
   }
 }; 

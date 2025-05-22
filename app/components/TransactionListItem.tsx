@@ -13,10 +13,12 @@ export function TransactionListItem({ transaction, account }: TransactionListIte
   const theme = useTheme();
 
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    const isPositive = amount >= 0;
+    const formattedAmount = Math.abs(amount).toLocaleString('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
+    });
+    return `${isPositive ? '+' : ''}${formattedAmount}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -46,7 +48,7 @@ export function TransactionListItem({ transaction, account }: TransactionListIte
         <Ionicons
           name={getTransactionIcon()}
           size={24}
-          color={theme.colors.text.secondary}
+          color={theme.colors.primary}
         />
       </View>
       <View style={styles.detailsContainer}>
@@ -54,7 +56,10 @@ export function TransactionListItem({ transaction, account }: TransactionListIte
           <Text style={[styles.description, { color: theme.colors.text.primary }]}>
             {transaction.description}
           </Text>
-          <Text style={[styles.amount, { color: transaction.amount >= 0 ? theme.colors.success : theme.colors.mutedError }]}>
+          <Text style={[
+            styles.amount,
+            { color: transaction.amount >= 0 ? theme.colors.success : theme.colors.text.primary }
+          ]}>
             {formatAmount(transaction.amount)}
           </Text>
         </View>
@@ -74,9 +79,9 @@ export function TransactionListItem({ transaction, account }: TransactionListIte
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    padding: 12,
+    padding: 4,
     borderRadius: 8,
-    marginBottom: 8,
+    marginVertical: 4
   },
   iconContainer: {
     width: 40,
@@ -97,22 +102,24 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   description: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
   },
   amount: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
+    paddingRight: 4
   },
   secondaryInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingRight: 4
   },
   date: {
-    fontSize: 14,
+    fontSize: 12,
   },
   account: {
-    fontSize: 14,
+    fontSize: 12,
   },
 }); 

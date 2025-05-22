@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { TransactionListItem } from './components/TransactionListItem';
 import { useTheme } from './theme';
@@ -56,11 +57,13 @@ export default function AccountDetailsScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { accountId } = useLocalSearchParams<{ accountId: string }>();
+  const [showMoneyActions, setShowMoneyActions] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   
   const account = mockAccounts.find(acc => acc.id === accountId);
   const accountTransactions = mockTransactions
     .filter(t => t.accountId === account?.id)
-    .slice(0, 5); // Limit to 5 most recent transactions
+    .slice(0, 5);
 
   if (!account) {
     return null;
@@ -74,6 +77,12 @@ export default function AccountDetailsScreen() {
   };
 
   const { moneyActions, managementActions } = getAccountActions(account);
+
+  const handleMoneyButtonPress = (event: any) => {
+    const { pageX, pageY } = event.nativeEvent;
+    setMenuPosition({ x: pageX - 200, y: pageY + 10 }); // Position menu to the left of the button
+    setShowMoneyActions(true);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}>
@@ -92,68 +101,47 @@ export default function AccountDetailsScreen() {
       <ScrollView style={styles.content}>
         {/* Account Summary */}
         <View style={[styles.summaryCard, { backgroundColor: theme.colors.background.primary }]}>
-          <Text style={[styles.accountName, { color: theme.colors.text.primary }]}>{account.name}</Text>
-          <Text style={[styles.accountNumber, { color: theme.colors.text.secondary }]}>
-            Account ending in {account.lastFourDigits}
-          </Text>
-          <Text style={[styles.balance, { color: theme.colors.text.primary }]}>
-            {formatAmount(account.balance)}
-          </Text>
-          {account.type === 'credit' && account.availableCredit !== undefined && (
-            <Text style={[styles.availableCredit, { color: theme.colors.text.secondary }]}>
-              Available Credit: {formatAmount(account.availableCredit)}
-            </Text>
-          )}
-        </View>
-
-        {/* Money Movement Actions */}
-        <View style={styles.actionsSection}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>Money Movement</Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.actionsRow}
-          >
-            {moneyActions.map((action) => (
-              <TouchableOpacity
-                key={action.id}
-                style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}
-              >
-                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={theme.colors.primary} />
-                <Text 
-                  style={[styles.actionButtonText, { color: theme.colors.primary }]}
-                  numberOfLines={1}
-                >
-                  {action.label}
+          <View style={styles.summaryContent}>
+            <View style={styles.summaryText}>
+              <Text style={[styles.accountName, { color: theme.colors.text.primary }]}>{account.name}</Text>
+              <Text style={[styles.accountNumber, { color: theme.colors.text.secondary }]}>
+                Account ending in {account.lastFourDigits}
+              </Text>
+              <Text style={[styles.balance, { color: theme.colors.text.primary }]}>
+                {formatAmount(account.balance)}
+              </Text>
+              {account.type === 'credit' && account.availableCredit !== undefined && (
+                <Text style={[styles.availableCredit, { color: theme.colors.text.secondary }]}>
+                  Available Credit: {formatAmount(account.availableCredit)}
                 </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+              )}
+            </View>
+            
+            {/* Money Movement Button */}
+            <TouchableOpacity
+              style={[styles.moneyMovementButton, { backgroundColor: theme.colors.primary }]}
+              onPress={handleMoneyButtonPress}
+            >
+              <Ionicons name="ellipsis-horizontal" size={32} color={theme.colors.text.light} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Account Management Actions */}
         <View style={styles.actionsSection}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>Account Management</Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.actionsRow}
-          >
+          <View style={styles.quickActions}>
             {managementActions.map((action) => (
               <TouchableOpacity
                 key={action.id}
                 style={[styles.actionButton, { backgroundColor: theme.colors.background.primary }]}
               >
-                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={theme.colors.primary} />
-                <Text 
-                  style={[styles.actionButtonText, { color: theme.colors.primary }]}
-                  numberOfLines={1}
-                >
+                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={16} color={theme.colors.primary} />
+                <Text style={[styles.actionButtonText, { color: theme.colors.primary }]} numberOfLines={1}>
                   {action.label}
                 </Text>
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </View>
         </View>
 
         {/* Recent Transactions */}
@@ -188,6 +176,41 @@ export default function AccountDetailsScreen() {
           ))}
         </View>
       </ScrollView>
+
+      {/* Money Movement Menu */}
+      {showMoneyActions && (
+        <Pressable
+          style={styles.menuOverlay}
+          onPress={() => setShowMoneyActions(false)}
+        >
+          <View 
+            style={[
+              styles.moneyActionsMenu,
+              { 
+                backgroundColor: theme.colors.background.primary,
+                left: menuPosition.x,
+                top: menuPosition.y,
+              }
+            ]}
+          >
+            {moneyActions.map((action) => (
+              <TouchableOpacity
+                key={action.id}
+                style={[styles.moneyActionItem, { borderBottomColor: theme.colors.border }]}
+                onPress={() => {
+                  setShowMoneyActions(false);
+                  // Handle action
+                }}
+              >
+                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={theme.colors.primary} />
+                <Text style={[styles.moneyActionText, { color: theme.colors.text.primary }]}>
+                  {action.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -266,18 +289,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingHorizontal: 16,
   },
-  actionsRow: {
+  quickActions: {
     flexDirection: 'row',
-    gap: 12,
-    paddingRight: 16,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   actionButton: {
-    minWidth: 100,
-    height: 80,
-    padding: 10,
+    flex: 1,
+    minWidth: '48%',
+    height: 44,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    gap: 4,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -290,7 +316,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    marginTop: 4,
     textAlign: 'center',
   },
   transactionsHeader: {
@@ -306,5 +331,62 @@ const styles = StyleSheet.create({
   availableCredit: {
     fontSize: 14,
     marginTop: 8,
+  },
+  summaryContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  summaryText: {
+    flex: 1,
+    marginRight: 16,
+  },
+  moneyMovementButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+  },
+  moneyActionsMenu: {
+    position: 'absolute',
+    width: 200,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1001,
+  },
+  moneyActionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    gap: 12,
+    borderBottomWidth: 1,
+  },
+  moneyActionText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 }); 

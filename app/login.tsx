@@ -208,7 +208,7 @@ export default function LoginScreen() {
           onPress={() => router.replace('/')}
         >
           <Text style={[styles.devButtonText, { color: theme.colors.primary }]}>
-            Development: Skip Login
+            Developer Mode
           </Text>
         </TouchableOpacity>
       </View>

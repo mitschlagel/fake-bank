@@ -1,10 +1,11 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
     FlatList,
     Keyboard,
     Modal,
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
@@ -17,10 +18,10 @@ import { TransactionListItem } from './components/TransactionListItem';
 import { useTheme } from './theme';
 import { mockAccounts, mockTransactions } from './types/account';
 
-type DateFilter = 'all' | 'today' | 'week' | 'month' | 'year' | 'custom';
+type DateFilter = 'all' | 'today' | 'week' | 'month' | 'year';
 type SortOrder = 'newest' | 'oldest';
 
-const getDateRange = (filter: DateFilter, customStartDate?: Date, customEndDate?: Date) => {
+const getDateRange = (filter: DateFilter) => {
   const now = new Date();
   const start = new Date();
   
@@ -37,11 +38,6 @@ const getDateRange = (filter: DateFilter, customStartDate?: Date, customEndDate?
     case 'year':
       start.setFullYear(now.getFullYear() - 1);
       break;
-    case 'custom':
-      if (customStartDate && customEndDate) {
-        return { start: customStartDate, end: customEndDate };
-      }
-      return { start: new Date(0), end: now };
     default:
       return { start: new Date(0), end: now };
   }
@@ -58,10 +54,7 @@ export default function TransactionsScreen() {
   const [selectedTransaction, setSelectedTransaction] = useState<typeof mockTransactions[0] | null>(null);
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [customStartDate, setCustomStartDate] = useState(new Date());
-  const [customEndDate, setCustomEndDate] = useState(new Date());
-  const [isSelectingStartDate, setIsSelectingStartDate] = useState(true);
+  const [showDateRangeModal, setShowDateRangeModal] = useState(false);
 
   // Set the selected transaction when the screen loads with a selectedTransactionId
   React.useEffect(() => {
@@ -77,24 +70,6 @@ export default function TransactionsScreen() {
     return mockAccounts.find(account => account.id === accountId) || mockAccounts[0];
   };
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      if (isSelectingStartDate) {
-        setCustomStartDate(selectedDate);
-        setIsSelectingStartDate(false);
-      } else {
-        setCustomEndDate(selectedDate);
-        setShowDatePicker(false);
-        setIsSelectingStartDate(true);
-      }
-    }
-  };
-
-  const openDatePicker = (isStart: boolean) => {
-    setIsSelectingStartDate(isStart);
-    setShowDatePicker(true);
-  };
-
   const filteredTransactions = useMemo(() => {
     let filtered = mockTransactions;
 
@@ -105,7 +80,7 @@ export default function TransactionsScreen() {
 
     // Apply date filter
     if (dateFilter !== 'all') {
-      const { start, end } = getDateRange(dateFilter, customStartDate, customEndDate);
+      const { start, end } = getDateRange(dateFilter);
       filtered = filtered.filter(t => {
         const date = new Date(t.date);
         return date >= start && date <= end;
@@ -139,7 +114,7 @@ export default function TransactionsScreen() {
     });
 
     return filtered;
-  }, [selectedAccountId, dateFilter, searchQuery, sortOrder, customStartDate, customEndDate]);
+  }, [selectedAccountId, dateFilter, searchQuery, sortOrder]);
 
   const renderTransaction = ({ item: transaction }: { item: typeof mockTransactions[0] }) => {
     const isSelected = transaction.id === selectedTransactionId;
@@ -206,129 +181,66 @@ export default function TransactionsScreen() {
     </View>
   );
 
-  const renderDatePickerModal = () => (
-    <Modal
-      visible={showDatePicker}
-      transparent={true}
-      animationType="slide"
-    >
-      <View style={styles.modalContainer}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.background.primary }]}>
-          <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>
-            {isSelectingStartDate ? 'Select Start Date' : 'Select End Date'}
-          </Text>
-          <DateTimePicker
-            value={isSelectingStartDate ? customStartDate : customEndDate}
-            mode="date"
-            display="spinner"
-            onChange={handleDateChange}
-            maximumDate={new Date()}
-            minimumDate={isSelectingStartDate ? new Date(0) : customStartDate}
-          />
-          <TouchableOpacity
-            style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
-            onPress={() => setShowDatePicker(false)}
-          >
-            <Text style={[styles.modalButtonText, { color: theme.colors.text.light }]}>
-              Cancel
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-
-  const renderCustomDateRange = () => (
-    <View style={styles.customDateContainer}>
-      <TouchableOpacity
-        style={[styles.dateButton, { backgroundColor: theme.colors.background.primary }]}
-        onPress={() => openDatePicker(true)}
-      >
-        <Text style={[styles.dateButtonText, { color: theme.colors.text.primary }]}>
-          {customStartDate.toLocaleDateString()}
-        </Text>
-      </TouchableOpacity>
-      <Text style={[styles.dateRangeSeparator, { color: theme.colors.text.secondary }]}>to</Text>
-      <TouchableOpacity
-        style={[styles.dateButton, { backgroundColor: theme.colors.background.primary }]}
-        onPress={() => openDatePicker(false)}
-      >
-        <Text style={[styles.dateButtonText, { color: theme.colors.text.primary }]}>
-          {customEndDate.toLocaleDateString()}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   const renderDateFilter = () => (
     <View style={styles.dateFilterContainer}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <TouchableOpacity
-          style={[
-            styles.dateFilterButton,
-            dateFilter === 'all' 
-              ? { backgroundColor: theme.colors.primary }
-              : { backgroundColor: theme.colors.background.primary }
-          ]}
-          onPress={() => setDateFilter('all')}
-        >
-          <Text style={[
-            styles.dateFilterText,
-            dateFilter === 'all' 
-              ? { color: theme.colors.text.light }
-              : { color: theme.colors.text.primary }
-          ]}>
-            All Time
-          </Text>
-        </TouchableOpacity>
-        {(['today', 'week', 'month', 'year'] as DateFilter[]).map(filter => (
-          <TouchableOpacity
-            key={filter}
-            style={[
-              styles.dateFilterButton,
-              dateFilter === filter 
-                ? { backgroundColor: theme.colors.primary }
-                : { backgroundColor: theme.colors.background.primary }
-            ]}
-            onPress={() => setDateFilter(filter)}
-          >
-            <Text style={[
-              styles.dateFilterText,
-              dateFilter === filter 
-                ? { color: theme.colors.text.light }
-                : { color: theme.colors.text.primary }
-            ]}>
-              {filter.charAt(0).toUpperCase() + filter.slice(1)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity
-          style={[
-            styles.dateFilterButton,
-            dateFilter === 'custom' 
-              ? { backgroundColor: theme.colors.primary }
-              : { backgroundColor: theme.colors.background.primary }
-          ]}
-          onPress={() => setDateFilter('custom')}
-        >
-          <Text style={[
-            styles.dateFilterText,
-            dateFilter === 'custom' 
-              ? { color: theme.colors.text.light }
-              : { color: theme.colors.text.primary }
-          ]}>
-            Custom Range
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-      <TouchableOpacity
-        style={[styles.sortButton, { backgroundColor: theme.colors.background.primary }]}
-        onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+      <Modal
+        visible={showDateRangeModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowDateRangeModal(false)}
       >
-        <Text style={[styles.sortButtonText, { color: theme.colors.primary }]}>
-          {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
-        </Text>
-      </TouchableOpacity>
+        <Pressable 
+          style={styles.modalOverlay}
+          onPress={() => setShowDateRangeModal(false)}
+        >
+          <Pressable 
+            style={[styles.dateRangeModalContent, { backgroundColor: theme.colors.background.primary }]}
+            onPress={e => e.stopPropagation()}
+          >
+            <View style={styles.dateRangeModalHeader}>
+              <Text style={[styles.dateRangeModalTitle, { color: theme.colors.text.primary }]}>
+                Select Date Range
+              </Text>
+              <Pressable
+                onPress={() => setShowDateRangeModal(false)}
+                style={({ pressed }) => [
+                  styles.dateRangeCloseButton,
+                  { opacity: pressed ? 0.7 : 1 }
+                ]}
+              >
+                <Ionicons name="close" size={24} color={theme.colors.text.primary} />
+              </Pressable>
+            </View>
+
+            <View style={styles.dateRangeOptions}>
+              {['All', 'Today', 'Week', 'Month', 'Year'].map((option) => (
+                <Pressable
+                  key={option}
+                  onPress={() => {
+                    setDateFilter(option.toLowerCase() as DateFilter);
+                    setShowDateRangeModal(false);
+                  }}
+                  style={({ pressed }) => [
+                    styles.dateRangeOption,
+                    dateFilter === option.toLowerCase() && styles.dateRangeOptionSelected,
+                    { opacity: pressed ? 0.7 : 1 }
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.dateRangeOptionText,
+                      { color: theme.colors.text.primary },
+                      dateFilter === option.toLowerCase() && { color: theme.colors.primary }
+                    ]}
+                  >
+                    {option}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 
@@ -344,6 +256,15 @@ export default function TransactionsScreen() {
         <View style={styles.titleContainer}>
           <Text style={[styles.title, { color: theme.colors.text.primary }]}>Transactions</Text>
         </View>
+        <Pressable
+          onPress={() => setShowDateRangeModal(true)}
+          style={({ pressed }) => [
+            styles.headerButton,
+            { opacity: pressed ? 0.7 : 1 }
+          ]}
+        >
+          <Ionicons name="calendar" size={20} color={theme.colors.primary} />
+        </Pressable>
       </View>
 
       <View style={[styles.searchContainer, { backgroundColor: theme.colors.background.primary }]}>
@@ -367,7 +288,6 @@ export default function TransactionsScreen() {
 
       {renderAccountFilter()}
       {renderDateFilter()}
-      {dateFilter === 'custom' && renderCustomDateRange()}
 
       <FlatList
         data={filteredTransactions}
@@ -378,7 +298,6 @@ export default function TransactionsScreen() {
         onScrollBeginDrag={Keyboard.dismiss}
       />
 
-      {renderDatePickerModal()}
       <TransactionDetailsSheet
         transaction={selectedTransaction}
         account={selectedTransaction ? getAccountById(selectedTransaction.accountId) : mockAccounts[0]}
@@ -455,83 +374,51 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   dateFilterContainer: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    display: 'none',
   },
-  dateFilterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
-  },
-  dateFilterText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  sortButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
-  },
-  sortButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
   },
-  modalContent: {
-    width: '80%',
-    padding: 20,
-    borderRadius: 12,
+  dateRangeModalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+    maxHeight: '80%',
+  },
+  dateRangeModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
     marginBottom: 16,
   },
-  modalButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  modalButtonText: {
-    fontSize: 16,
+  dateRangeModalTitle: {
+    fontSize: 18,
     fontWeight: '600',
   },
-  customDateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
+  dateRangeCloseButton: {
+    padding: 4,
+  },
+  dateRangeOptions: {
     gap: 8,
   },
-  dateButton: {
+  dateRangeOption: {
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 12,
   },
-  dateButtonText: {
-    fontSize: 14,
+  dateRangeOptionSelected: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  dateRangeOptionText: {
+    fontSize: 16,
     fontWeight: '500',
   },
-  dateRangeSeparator: {
-    fontSize: 14,
-    fontWeight: '500',
+  headerButton: {
+    padding: 8,
+    position: 'absolute',
+    right: 8,
+    zIndex: 1,
   },
 }); 

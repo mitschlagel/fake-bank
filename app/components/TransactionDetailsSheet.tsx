@@ -17,21 +17,18 @@ interface TransactionDetailsSheetProps {
   onClose: () => void;
 }
 
-export function TransactionDetailsSheet({
-  transaction,
-  account,
-  visible,
-  onClose,
-}: TransactionDetailsSheetProps) {
+export function TransactionDetailsSheet({ transaction, account, visible, onClose }: TransactionDetailsSheetProps) {
   const theme = useTheme();
 
   if (!transaction) return null;
 
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    const formattedAmount = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
+    }).format(Math.abs(amount));
+    
+    return amount >= 0 ? `+${formattedAmount}` : formattedAmount;
   };
 
   const formatDate = (dateString: string) => {
@@ -62,7 +59,7 @@ export function TransactionDetailsSheet({
   return (
     <Modal
       visible={visible}
-      transparent
+      transparent={true}
       animationType="slide"
       onRequestClose={onClose}
     >
@@ -87,11 +84,11 @@ export function TransactionDetailsSheet({
               <Ionicons
                 name={getTransactionIcon()}
                 size={48}
-                color={transaction.amount >= 0 ? theme.colors.success : theme.colors.error}
+                color={transaction.amount >= 0 ? theme.colors.success : theme.colors.text.primary}
               />
               <Text style={[
                 styles.amount,
-                { color: transaction.amount >= 0 ? theme.colors.success : theme.colors.error }
+                { color: transaction.amount >= 0 ? theme.colors.success : theme.colors.text.primary }
               ]}>
                 {formatAmount(transaction.amount)}
               </Text>

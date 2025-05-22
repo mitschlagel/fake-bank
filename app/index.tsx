@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Header } from './components/Header';
 import AccountSection from './components/sections/AccountSection';
 import ActivitySection from './components/sections/ActivitySection';
@@ -69,7 +69,7 @@ export default function HomeScreen() {
     }
   };
 
-  const recentTransactions = getRecentTransactions().slice(0, 3);
+  const recentTransactions = getRecentTransactions().slice(0, 5);
 
   // Filter and sort accounts based on preferences
   const displayedAccounts = mockAccounts
@@ -124,6 +124,17 @@ export default function HomeScreen() {
           transactions={recentTransactions}
           getAccountById={getAccountById}
         />
+        <View style={{ marginTop: 32, paddingHorizontal: 8, marginBottom: 32, paddingBottom: 24 }}>
+          <Text style={{ fontSize: 12, color: theme.colors.text.secondary, textAlign: 'center', opacity: 0.7 }}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed dictum, urna eu cursus dictum, enim erat dictum urna, nec dictum enim urna eu enim. 
+            
+            1234 Main Street, Springfield, USA 12345. 
+            
+            All transactions are subject to review and approval. Balances may not reflect all pending activity. This is not a statement of account. For questions, contact support. 
+            
+            © 2024 Fake Bank. All rights reserved. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. 
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );

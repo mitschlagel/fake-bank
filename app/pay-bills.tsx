@@ -24,7 +24,7 @@ export default function PayBillsScreen() {
   const router = useRouter();
   const theme = useTheme();
   const [selectedBiller, setSelectedBiller] = useState<typeof mockBillers[0] | null>(null);
-  const [fromAccount, setFromAccount] = useState(mockAccounts[0]);
+  const [fromAccount] = useState(mockAccounts[0]);
   const [amount, setAmount] = useState('');
 
   const handlePayment = () => {

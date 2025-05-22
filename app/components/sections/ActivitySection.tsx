@@ -31,7 +31,7 @@ export default function ActivitySection({ quickActions }: ActivitySectionProps) 
           >
             <Ionicons name={action.icon} size={16} color={theme.colors.primary} />
             <Text style={[styles.actionButtonText, { color: theme.colors.primary }]} numberOfLines={1}>
-              {action.label}
+              {String(action.label)}
             </Text>
           </TouchableOpacity>
         ))}
